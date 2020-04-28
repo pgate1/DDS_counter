@@ -1,0 +1,405 @@
+<html lang="ja">
+	<head>
+		<META http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
+		<title>DDSを応用した任意サイクルの生成</title>
+	<!--	<meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+		<META NAME="Robots" CONTENT="index, follow">
+		<META NAME="keywords" CONTENT="FPGA, Verilog, VHDL">
+		
+		<meta name="twitter:card" content="summary">
+		<meta name="twitter:site" content="@pgate1">
+		<meta name="twitter:title" content="DDSを応用した任意サイクルの生成">
+		<meta name="twitter:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
+		<meta name="twitter:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
+		<meta name="twitter:description" content="
+			FPGAでの同期設計で使用する、任意サイクル生成回路のためのパラメータ計算機です。
+		">
+		<meta property="og:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
+		<meta property="og:title" content="DDSを応用した任意サイクルの生成">
+		<meta property="og:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
+		<meta property="og:description" content="
+		FPGAでの同期設計で使用する、任意サイクル生成回路のためのパラメータ計算機です。
+		">
+
+	</head>
+
+	<script language="javascript" type="text/javascript">
+
+		function clear()
+		{
+			document.getElementById("result").value = "";
+			document.getElementById("hdlcode").value = "";
+		}
+		
+		function euclid(a, b)
+		{
+			if(b==0) return a;
+			return euclid(b, a % b);
+		}
+
+		let base, target;
+		let best_counter_bit_width, best_add, best_max;
+
+		function dds_calc()
+		{
+			clear();
+
+			base = parseFloat(document.getElementById("base").value);
+			target = parseFloat(document.getElementById("target").value);
+			const bit_max = parseInt(document.getElementById("bit_max").value);
+			//alert(base.toString());
+
+			const hdl_elements = document.getElementsByName("hdl");
+			let hdl = "verilog";
+			for(let i=0; i<hdl_elements.length; i++){
+				if(hdl_elements[i].checked){
+					hdl = hdl_elements[i].value;
+					break;
+				}
+			}
+
+			//alert(target.toString() + " " + base.toString());
+			if(target > base){
+				document.getElementById("result").value = "逓倍はできません。";
+				return;
+			}
+
+			const gcd = euclid(Math.floor(base), Math.floor(target));
+			//alert(gcd.toString());
+			if(gcd == 1){
+				if(window.confirm("最大公約数が1のため、処理に時間がかかる可能性があります。\n実行しますか？") == false){
+					document.getElementById("result").value = "キャンセルしました。";
+					return;
+				}
+			}
+
+			best_counter_bit_width = 0;
+			let result = "";
+			let best_gosa = base;
+			let add_bit;
+			for(add_bit=1; add_bit<bit_max; add_bit++){
+				let add;
+				for(add=1<<(add_bit-1); add<1<<add_bit; add++){
+					
+					const max = Math.round(base / target * add); // 四捨五入
+				//	let max = Math.floor(base / target * add); // 切り捨て
+				//	let max = Math.ceil(base / target * add); // 切り上げ
+					// カウンタのビット幅を求める
+					const counter_bit_width = max.toString(2).length + 1;
+					//alert(375.toString(2).length); return;
+
+					const hz = base * (add / max);
+					const gosa = hz - target;
+					gosa_min = Math.abs(gosa);
+					if(gosa_min < best_gosa && counter_bit_width <= bit_max){
+						f_renew = true;
+						best_add = add;
+						best_max = max;
+						best_gosa = gosa_min;
+			
+						// 誤差(PPM:Parts Per Million)
+						const best_ppm = best_gosa / target * 1000000;
+
+						let str = "";
+						str += "カウンタ" + counter_bit_width.toString() + "bit ";
+					//	str += hz.toFixed(12) + "Hz ";
+						str += "加算値=" + best_add.toString() /*+ "(0x" + best_add.toString(16).toUpperCase() + ")"*/ + " ";
+						str += "最大値=" + best_max.toString() /*+ "(0x" + best_max.toString(16).toUpperCase() + ")"*/ + " ";
+						str += "誤差:" + best_gosa.toFixed(20) + " ";
+						str += best_ppm.toFixed(10) + "ppm";
+						str += "\n";
+
+						// 前回の記録と同じビット幅なら上書きする
+						if(counter_bit_width == best_counter_bit_width){
+							const p = result.lastIndexOf("カウンタ");
+							if(p != -1){
+								result = result.slice(0, p);
+							}
+						}
+						result += str;
+						best_counter_bit_width = counter_bit_width;
+
+						// 誤差0で計算打ち切り
+						if(best_gosa == 0){
+							add_bit = bit_max;
+							break;
+						}
+					}
+					// ビット幅で打ち切り
+					if(counter_bit_width > bit_max){
+						break;
+					}
+				}
+			}
+
+			if(result.length){
+				result += "計算終了☆(ゝω･)v";
+				document.getElementById("result").value = result;
+				if(hdl=="verilog") output_verilog();
+				else output_vhdl();
+			}
+			else{
+				document.getElementById("result").value = "候補がありません。最大ビット幅を増やしてみてください。";
+			}
+		}
+
+		function output_verilog()
+		{
+			let code = document.getElementById("dds_verilog").innerHTML;
+
+			const base_str = base.toString().split('.').join('');
+			const target_str = target.toString().split('.').join('');
+			code = code.replace("verilog", base_str+"to"+target_str);
+
+			code = code.replace("_COUNT_WIDTH", best_counter_bit_width.toString());
+			code = code.replace("_MAX_NUM", best_counter_bit_width.toString()+"'d"+best_max.toString());
+			code = code.replace("_ADD_NUM", best_counter_bit_width.toString()+"'d"+best_add.toString());
+
+			// &lt; を < に置換
+			code = code.split("&lt;").join('<');
+
+			document.getElementById("hdlcode").value = code;
+		}
+
+		function output_vhdl()
+		{
+			let code = document.getElementById("dds_vhdl").innerHTML;
+
+			const base_str = base.toString().split('.').join('');
+			const target_str = target.toString().split('.').join('');
+			code = code.split("vhdl").join(base_str+"to"+target_str);
+
+			code = code.replace("_COUNT_WIDTH", best_counter_bit_width.toString());
+			code = code.replace("_MAX_NUM", best_max.toString());
+			code = code.replace("_ADD_NUM", best_add.toString());
+
+			// &lt; を < に置換
+			code = code.split("&lt;").join('<');
+			// &gt; を > に置換
+			code = code.split("&gt;").join('>');
+
+			document.getElementById("hdlcode").value = code;
+		}
+	</script>
+
+	<body bgcolor="#FAF3DF" onload="clear()">
+
+<pre hidden id="dds_verilog">
+module dds_verilog (
+	rst, clk, enable
+);
+	input rst, clk;
+	output enable;
+
+	parameter COUNT_WIDTH = _COUNT_WIDTH;
+	parameter ADD_NUM = _ADD_NUM;
+	parameter MAX_NUM = _MAX_NUM;
+
+	wire [COUNT_WIDTH-1:0] add;
+	wire [COUNT_WIDTH-1:0] max;
+	reg  [COUNT_WIDTH-1:0] count;
+	wire [COUNT_WIDTH-1:0] sa;
+
+	assign add = ADD_NUM;
+	assign max = MAX_NUM;
+
+	assign sa = count - max;
+
+	always @(posedge clk) begin
+		if(rst)
+			count <= 0;
+		else if(sa[COUNT_WIDTH-1]) // count < max
+			count <= count + add;
+		else
+			count <= sa + add;
+	end
+
+	assign enable = ~sa[COUNT_WIDTH-1];
+
+endmodule
+</pre>
+<pre hidden id="dds_vhdl">
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+
+entity dds_vhdl is
+	port(
+		rst, clk : in std_logic;
+		enable : out std_logic
+	);
+end dds_vhdl;
+
+architecture RTL of dds_vhdl is
+
+constant COUNT_WIDTH : integer := _COUNT_WIDTH;
+constant ADD_NUM : std_logic_vector(COUNT_WIDTH-1 downto 0)
+	:= std_logic_vector(to_unsigned(_ADD_NUM, COUNT_WIDTH));
+constant MAX_NUM : std_logic_vector(COUNT_WIDTH-1 downto 0)
+	:= std_logic_vector(to_unsigned(_MAX_NUM, COUNT_WIDTH));
+
+signal add   : std_logic_vector(COUNT_WIDTH-1 downto 0);
+signal max   : std_logic_vector(COUNT_WIDTH-1 downto 0);
+signal count : std_logic_vector(COUNT_WIDTH-1 downto 0);
+signal sa    : std_logic_vector(COUNT_WIDTH-1 downto 0);
+
+begin
+
+	add <= ADD_NUM;
+	max <= MAX_NUM;
+
+	sa <= count - max;
+
+	process(clk) begin
+		if rising_edge(clk) then
+			if rst='1' then
+				count <= (others => '0');
+			elsif sa(COUNT_WIDTH-1)='1' then -- count < max
+				count <= count + add;
+			else
+				count <= sa + add;
+			end if;
+		end if;
+	end process;
+
+	enable <= not sa(COUNT_WIDTH-1);
+
+end RTL;
+</pre>
+
+<table width="80%" align=center><tr><td>
+
+	<table border=0 width=100%><tr><td>
+	<a href=../../>HOME</a>
+	</td><td align=right>
+	2020/04/27
+	</td></tr></table>
+	
+	<hr>
+
+		<h2>DDS（Direct Digital Synthesizer）を応用した任意サイクルの生成</h2>
+		<p>
+			FPGAに実装するタイマ回路など同期設計で任意サイクルを使用したいとき、
+			ベースクロックから任意サイクルのイネーブル信号を生成する回路を使います。
+			ここではその任意サイクルを生成するためのパラメータを計算できます。
+			<p>
+			なお本回路はベースクロック信号の精度に依存するため、
+			イネーブル信号の精度を完全に保証するものではありませんのでご了承ください。
+			てい倍はできません。
+		<p>
+		<table>
+		<tr>
+			<td align="right" valign="top">ベースクロック＝
+			</td>
+			<td>
+				<input type="text" id="base" size="12" value="50000000">Hz<br>
+				<small>クロック周波数を入力してください。</small>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" valign="top">ターゲットサイクル＝</td>
+			<td>
+				<input type="text" id="target" size="12" value="1789772.5">サイクル<br>
+				<small>ターゲットサイクル数はクロック周波数以下です。</small>
+			</td>
+		</tr>
+			<td align="right" valign="top" nowrap>カウンタ最大ビット幅＝</td>
+			<td>
+				<input type="text" id="bit_max" size="12" value="30">bit<br>
+				<small>計算するカウンタのビット幅が大きいほど精度が良くなります。<br>
+					誤差が0になればそこで計算を打ち切ります。</small>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" valign="top">HDL出力：</td>
+			<td>
+				<input type="radio" name="hdl" value="verilog" checked>VerilogHDL
+				<input type="radio" name="hdl" value="vhdl">VHDL
+			</td>
+		</tr>
+		</table>
+		<input type="button" id="run" value="計算する" onclick="dds_calc()">
+		<p>
+		
+			<textarea id="result" spellcheck="false" rows="10" cols="100"></textarea>
+			<p>
+			<textarea id="hdlcode" spellcheck="false" rows="20" cols="80"></textarea>
+		<p>
+
+		<hr>
+		<h3>解説</h3>
+DDSを応用したカウンタでベースクロックから任意サイクルのイネーブル信号を生成します。
+特徴はイネーブル信号が偏っていないことです。
+FPGAでの同期設計のときに任意サイクル生成回路として使用します。
+非同期回路じゃなくてよい場合はこういう手もあるかなと。
+<p>
+例えば簡単な例だと、ベースクロック50MHzでターゲットサイクルが30MHzであれば、
+その比は5:3なので、パラメータはそれぞれ加算値3、最大値5となります。
+<p>
+	以下は疑似コードです。
+<table cellpadding="10" bgcolor="#EEFFEE"><tr><td><pre>
+module dds
+{
+	input rst, clk;
+	output enable;
+
+	wire add = 3; // 加算値
+	wire max = 5; // 最大値
+	reg count;
+
+	if(clk){
+		if(rst){
+			count = 0;
+		}
+		else if(count &lt; max){
+			count += add;
+		}
+		else{
+			count = (count - max) + add;
+			enable();
+		}
+	}
+}
+</pre></td></tr></table>
+<p>
+５クロックに３回enable信号がHiになります。これは簡単ですね。<br>
+<img src=wave.png>
+<p>
+	違う例では、ベースクロック50MHzでターゲットサイクルが33.8688MHz（PlayStationのCPU周波数）だと、
+	最大公約数が3200ですね。
+	それぞれ最大公約数で割ると、加算値10584、最大値15625となります。
+	これは12bitのカウンタを使うことで誤差が0となり、最大公約数が大きいほどカウンタのビット幅が少なくて済むわけです。
+	（ここでの誤差とは、理想的なターゲット周波数と実際のイネーブルサイクルの差）
+<p>
+	では最大公約数が小さい場合どうしましょうか？
+	もちろんカウンタのbit幅を増やせば増やすほど誤差は小さくなります。
+	ただし、誤差は小さくしたいけど、カウンタのビット幅もできるだけ小さくしたい。
+	そこで適切な加算値と最大値をパラメータとして見つける必要があります。
+	<p>
+	例えばファミコンの描画プロセッサの動作周波数は5.369318MHzです。
+	これをベースクロック50MHzから生成するとなると、パラメータ探索結果は以下の通り。
+<pre>
+　カウンタ 5bit  加算値=      1  最大値=       9  誤差:186237.55555555503815412521
+　カウンタ 6bit  加算値=      3  最大値=      28  誤差: 12175.14285714272409677505
+　カウンタ 8bit  加算値=     13  最大値=     121  誤差:  2582.82644628081470727921
+　カウンタ 9bit  加算値=     16  最大値=     149  誤差:   190.48322147689759731293
+　カウンタ11bit  加算値=    109  最大値=    1015  誤差:   140.12807881738990545273
+　カウンタ12bit  加算値=    189  最大値=    1760  誤差:     0.18181818164885044098
+　カウンタ18bit  加算値=  14002  最大値=  130389  誤差:     0.03606132417917251587
+　カウンタ19bit  加算値=  16837  最大値=  156789  誤差:     0.00062504410743713379
+　カウンタ20bit  加算値=  50322  最大値=  468607  誤差:     0.00005548354238271713
+　カウンタ22bit  加算値= 218125  最大値= 2031217  誤差:     0.00000295415520668030
+　カウンタ24bit  加算値= 822178  最大値= 7656261  誤差:     0.00000026077032089233
+　カウンタ26bit  加算値=2684659  最大値=25000000  誤差:     0.00000000000000000000
+</pre>
+
+結果、カウンタが26bitあれば誤差0のイネーブルサイクルが作れます。
+ただ、（ベースクロック自体の誤差から見て十分小さい誤差かどうか判断して）
+誤差をいくらか許容するならば、
+カウンタ12bitあたりの加算値と最大値を選択することでビット幅を抑えることができます。
+<hr>
+<center>Copyright(C)2020 pgate1 All Rights Reserved.</center>
+	</td></tr></table>
+	</body>
+</html>
