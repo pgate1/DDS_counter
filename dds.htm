@@ -121,7 +121,7 @@
 						best_counter_bit_width = counter_bit_width;
 
 						// Œë·0‚ÅŒvZ‘Å‚¿Ø‚è
-						if(best_gosa == 0){
+						if(best_gosa == 0 || best_gosa == Number.MIN_VALUE){
 							add_bit = bit_max;
 							break;
 						}
