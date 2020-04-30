@@ -65,7 +65,8 @@
 			}
 
 			const gcd = euclid(Math.floor(base), Math.floor(target));
-			//alert(gcd.toString());
+			const lcm = base * target / gcd;
+			//alert("最大公約数"+gcd.toString()+" 最小公倍数"+lcm.toString());
 			if(gcd == 1){
 				if(window.confirm("最大公約数が1のため、処理に時間がかかる可能性があります。\n実行しますか？") == false){
 					document.getElementById("result").value = "キャンセルしました。";
