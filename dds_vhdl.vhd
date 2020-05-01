@@ -37,7 +37,7 @@ begin
 			elsif sa(COUNT_WIDTH-1)='1' then -- count < max
 				count <= count + add;
 			else
-				count <= sa + add;
+				count <= count + add - max;
 			end if;
 		end if;
 	end process;

@@ -24,7 +24,7 @@ module dds_verilog (
 		else if(sa[COUNT_WIDTH-1]) // count < max
 			count <= count + add;
 		else
-			count <= sa + add;
+			count <= count + add - max;
 	end
 
 	assign enable = ~sa[COUNT_WIDTH-1];

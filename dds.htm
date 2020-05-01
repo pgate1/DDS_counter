@@ -212,7 +212,7 @@ module dds_verilog (
 		else if(sa[COUNT_WIDTH-1]) // count < max
 			count <= count + add;
 		else
-			count <= sa + add;
+			count <= count + add - max;
 	end
 
 	assign enable = ~sa[COUNT_WIDTH-1];
@@ -259,7 +259,7 @@ begin
 			elsif sa(COUNT_WIDTH-1)='1' then -- count < max
 				count <= count + add;
 			else
-				count <= sa + add;
+				count <= count + add - max;
 			end if;
 		end if;
 	end process;
@@ -357,14 +357,15 @@ module dds
 			count += add;
 		}
 		else{
-			count = (count - max) + add;
+			count += add - max;
 			enable();
 		}
 	}
 }
 </pre></td></tr></table>
 <p>
-５クロックに３回enable信号がHiになります。これは簡単ですね。<br>
+５クロックに３回enable信号がHiになります。これは簡単ですね。
+あくまでイネーブル信号であり、30MHzのクロックではないことに注意してください。<br>
 <img src=wave.png>
 <p>
 	違う例では、ベースクロック50MHzでターゲットサイクルが33.8688MHz（PlayStationのCPU周波数）だと、
