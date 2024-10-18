@@ -46,11 +46,14 @@ int euclid(int a, int b)
 
 int main(void)
 {
-	const int base = 50000000; // ƒx[ƒXƒNƒƒbƒN
+	const int base = 
+	//	50000000; // DE0
+		27000000; // TangNano9K
+
 	const double target = 
 	//	1789772.5; // NES ¶¬ü”g”
 	//	1662607; // NES PAL ¶¬ü”g”
-		5369318; // NES PPU ¶¬ü”g”
+	//	5369318; // NES PPU ¶¬ü”g”
 	//	10000000; // test ¶¬ü”g”
 	//	1024000; // SNES APU ¶¬ü”g”1
 	//	2048000; // SNES APU ¶¬ü”g”2
@@ -60,6 +63,8 @@ int main(void)
 	//	0.2; // test
 	//	0.01; // test ŠÔ‚ª‚©‚©‚é
 	//	499006; // test ŠÔ‚ª‚©‚©‚é
+		124875000; // TangNano9K HDMI
+	//	224875200; // test
 
 	int add, max;
 
@@ -67,46 +72,58 @@ int main(void)
 	double best_gosa = base;
 
 	const double gosa_siki = 0.00000000001;
-	double gosa_min;
+
 	if(target>=1){
 		int gcd = euclid(base, (int)(target));
 		printf("Å‘åŒö–ñ”(GCD) %d\n", gcd);
 	}
 
-//	printf(" add   ‰ÁZ’l ‚µ‚«‚¢’l   Œë·\n");
+	int f_mode = 0; // •ªü
+	if(target > base) f_mode = 1; // ’ü”{
 
-int add_bits;
-for(add_bits=1; add_bits<=32; add_bits++){
+//	printf(" add   ‰ÁZ’l ‚µ‚«‚¢’l   Œë·\n");
+	int bit_max = 32;
+	if(f_mode) bit_max = 8; // ’ü”{
+
+int add_bit;
+for(add_bit=1; add_bit<=bit_max; add_bit++){
 
 //	for(add=target/gcd; add<1<<bits; add++){ // gcd==1‚Ì‚Í–ğ‚É—§‚½‚È‚¢
-	for(add=1<<(add_bits-1); add<1<<add_bits; add++){ // ‘‰Á‚ÅŒ©‚Ä‚İ‚é
+	for(add=1<<(add_bit-1); add<1<<add_bit; add++){ // ‘‰Á‚ÅŒ©‚Ä‚İ‚é
 //	for(add=(1<<bits)-1; add>=1<<(bits-1); add--){ // Œ¸­‚ÅŒ©‚Ä‚İ‚é
 
-		max = (int)(base / target * add + 0.5); // 0.5‚ÍlÌŒÜ“ü‚µ‚½•û‚ªŒŸ¸ƒP[ƒX‚ª‘½‚¢
 //		max = (int)(base / target * add);
+		max = (int)((double)add * base / target + 0.5); // 0.5‚ÍlÌŒÜ“ü‚µ‚½•û‚ªŒŸ¸ƒP[ƒX‚ª‘½‚¢
 
 		double hz = base * ((double)add / max);
 		double gosa = hz - target;
-		gosa_min = gosa;
-		if(fabs(gosa_min) < fabs(best_gosa)){
+		if(fabs(gosa) < fabs(best_gosa)){
 			best_add = add;
 			best_max = max;
-			best_gosa = gosa_min;
+			best_gosa = gosa;
 			
 			// Œë·(PPM:Parts Per Million)
 			double ppm = best_gosa / target * 1000000;
 
-		//	printf("XV Œë· %f  %f Hz\n", gosa_min, hz);
-			printf("‰ÁZ’l %2dbit %7d ‚µ‚«‚¢’l %8d  Œë· %17.10lf %14.8lfPPM\n", add_bits, best_add, best_max, best_gosa, ppm);
-		//	printf("%2dbit %7d %8d %17.10lf\n", bits, add, max, gosa_min);
-		//	if(best_gosa==0.0) goto END; // NG
+			// •ªü
+			if(f_mode==0){
+			//	printf("XV Œë· %f  %f Hz\n", gosa, hz);
+			//	printf("%2dbit %7d %8d %17.10lf\n", bits, add, max, gosa);
+				printf("‰ÁZ’l %2dbit %7d ‚µ‚«‚¢’l %8d  Œë· %17.10lf %14.8lfPPM\n", add_bit, best_add, best_max, best_gosa, ppm);
+			}
+			// ’ü”{
+			else{
+				printf("ü”g” %f  Mul %8d  Div %7d  Œë· %17.10lf\n", hz, best_add, best_max, best_gosa);
+			}
+			
+			//	if(best_gosa==0.0) goto END; // NG
 			if(fabs(best_gosa) < gosa_siki) goto END;
 		}
 	}
 }
 END:
 //	printf("‰ÁZ’l %d:0x%X  ‚µ‚«‚¢’l %d:0x%X  Œë· %f\n", best_add, best_add, best_max, best_max, best_gosa);
-	printf("%dbit ‰ÁZ’l %d:0x%X  ‚µ‚«‚¢’l %d:0x%X  Œë· %0.10lf Hz\n", add_bits, best_add, best_add, best_max, best_max, best_gosa);
+//	printf("%dbit ‰ÁZ’l %d:0x%X  ‚µ‚«‚¢’l %d:0x%X  Œë· %0.10lf Hz\n", add_bits, best_add, best_add, best_max, best_max, best_gosa);
 
 	return 0;
 }

@@ -1,353 +1,136 @@
+<!DOCTYPE html>
 <html lang="ja">
-	<head>
-		<META http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
-		<title>DDS‚ğ‰—p‚µ‚½”CˆÓƒTƒCƒNƒ‹‚Ì¶¬</title>
-	<!--	<meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
-		<META NAME="Robots" CONTENT="index, follow">
-		<META NAME="keywords" CONTENT="FPGA, Verilog, VHDL">
+
+<head>
+	<META http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<title>DDSã‚’å¿œç”¨ã—ãŸä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã®ç”Ÿæˆ</title>
+<!--	<meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+	<META NAME="Robots" CONTENT="index, follow">
+	<META NAME="keywords" CONTENT="FPGA, Verilog, VHDL">
 		
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:site" content="@pgate1">
-		<meta name="twitter:title" content="DDS‚ğ‰—p‚µ‚½”CˆÓƒTƒCƒNƒ‹‚Ì¶¬">
-		<meta name="twitter:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
-		<meta name="twitter:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
-		<meta name="twitter:description" content="
-			FPGA‚Å‚Ì“¯ŠúİŒv‚Åg—p‚·‚éA”CˆÓƒTƒCƒNƒ‹¶¬‰ñ˜H‚Ì‚½‚ß‚Ìƒpƒ‰ƒ[ƒ^ŒvZ‹@‚Å‚·B
-		">
-		<meta property="og:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
-		<meta property="og:title" content="DDS‚ğ‰—p‚µ‚½”CˆÓƒTƒCƒNƒ‹‚Ì¶¬">
-		<meta property="og:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
-		<meta property="og:description" content="
-		FPGA‚Å‚Ì“¯ŠúİŒv‚Åg—p‚·‚éA”CˆÓƒTƒCƒNƒ‹¶¬‰ñ˜H‚Ì‚½‚ß‚Ìƒpƒ‰ƒ[ƒ^ŒvZ‹@‚Å‚·B
-		">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:site" content="@pgate1">
+	<meta name="twitter:title" content="DDSã‚’å¿œç”¨ã—ãŸä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã®ç”Ÿæˆ">
+	<meta name="twitter:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
+	<meta name="twitter:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
+	<meta name="twitter:description" content="
+		FPGAã§ã®åŒæœŸè¨­è¨ˆã§ä½¿ç”¨ã™ã‚‹ã€ä»»æ„ã‚µã‚¤ã‚¯ãƒ«ç”Ÿæˆå›è·¯ã®ãŸã‚ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨ˆç®—æ©Ÿã§ã™ã€‚
+	">
+	<meta property="og:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
+	<meta property="og:title" content="DDSã‚’å¿œç”¨ã—ãŸä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã®ç”Ÿæˆ">
+	<meta property="og:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
+	<meta property="og:description" content="
+	FPGAã§ã®åŒæœŸè¨­è¨ˆã§ä½¿ç”¨ã™ã‚‹ã€ä»»æ„ã‚µã‚¤ã‚¯ãƒ«ç”Ÿæˆå›è·¯ã®ãŸã‚ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¨ˆç®—æ©Ÿã§ã™ã€‚
+	">
+</head>
 
-	</head>
+<body bgcolor="#FAF3DF" onload="clear()">
 
-	<script language="javascript" type="text/javascript">
-
-		function clear()
-		{
-			document.getElementById("result").value = "";
-			document.getElementById("hdlcode").value = "";
-		}
-		
-		function euclid(a, b)
-		{
-			if(b==0) return a;
-			return euclid(b, a % b);
-		}
-
-		let base, target;
-		let best_counter_bit_width, best_add, best_max;
-
-		function dds_calc()
-		{
-			clear();
-
-			base = parseFloat(document.getElementById("base").value);
-			target = parseFloat(document.getElementById("target").value);
-			const bit_max = parseInt(document.getElementById("bit_max").value);
-			//alert(base.toString());
-
-			const hdl_elements = document.getElementsByName("hdl");
-			let hdl = "verilog";
-			for(let i=0; i<hdl_elements.length; i++){
-				if(hdl_elements[i].checked){
-					hdl = hdl_elements[i].value;
-					break;
-				}
-			}
-
-			//alert(target.toString() + " " + base.toString());
-			if(target > base){
-				document.getElementById("result").value = "’ü”{‚Í‚Å‚«‚Ü‚¹‚ñB";
-				return;
-			}
-
-			const gcd = euclid(Math.floor(base), Math.floor(target));
-			const lcm = base * target / gcd;
-			//alert("Å‘åŒö–ñ”"+gcd.toString()+" Å¬Œö”{”"+lcm.toString());
-			if(gcd == 1){
-				if(window.confirm("Å‘åŒö–ñ”‚ª1‚Ì‚½‚ßAˆ—‚ÉŠÔ‚ª‚©‚©‚é‰Â”\«‚ª‚ ‚è‚Ü‚·B\nÀs‚µ‚Ü‚·‚©H") == false){
-					document.getElementById("result").value = "ƒLƒƒƒ“ƒZƒ‹‚µ‚Ü‚µ‚½B";
-					return;
-				}
-			}
-
-			best_counter_bit_width = 0;
-			let result = "";
-			let best_gosa = base;
-			let add_bit;
-			for(add_bit=1; add_bit<bit_max; add_bit++){
-				let add;
-				for(add=1<<(add_bit-1); add<1<<add_bit; add++){
-					
-					const max = Math.round(add * base / target); // lÌŒÜ“ü
-				//	const max = Math.floor(add * base / target); // Ø‚èÌ‚Ä
-				//	const max = Math.ceil(add * base / target); // Ø‚èã‚°
-					// ƒJƒEƒ“ƒ^‚Ìƒrƒbƒg•‚ğ‹‚ß‚é
-					const counter_bit_width = max.toString(2).length + 1;
-					//alert(375.toString(2).length); return;
-
-				//	const hz = base * (add / max); // Œë·‚ª‘å‚«‚¢
-					const hz = base * add / max;
-					const gosa = hz - target;
-					gosa_min = Math.abs(gosa);
-					if(gosa_min < best_gosa && counter_bit_width <= bit_max){
-						f_renew = true;
-						best_add = add;
-						best_max = max;
-						best_gosa = gosa_min;
-			
-						// Œë·(PPM:Parts Per Million)
-						const best_ppm = 1000000 * best_gosa / target;
-
-						let str = "";
-						str += "ƒJƒEƒ“ƒ^" + counter_bit_width.toString() + "bit ";
-					//	str += hz.toFixed(12) + "Hz ";
-						str += "‰ÁZ’l=" + best_add.toString() /*+ "(0x" + best_add.toString(16).toUpperCase() + ")"*/ + " ";
-						str += "Å‘å’l=" + best_max.toString() /*+ "(0x" + best_max.toString(16).toUpperCase() + ")"*/ + " ";
-						str += "Œë·:" + best_gosa.toFixed(20) + " ";
-						str += best_ppm.toFixed(10) + "ppm";
-						str += "\n";
-
-						// ‘O‰ñ‚Ì‹L˜^‚Æ“¯‚¶ƒrƒbƒg•‚È‚çã‘‚«‚·‚é
-						if(counter_bit_width == best_counter_bit_width){
-							const p = result.lastIndexOf("ƒJƒEƒ“ƒ^");
-							if(p != -1){
-								result = result.slice(0, p);
-							}
-						}
-						result += str;
-						best_counter_bit_width = counter_bit_width;
-
-						// Œë·0‚ÅŒvZ‘Å‚¿Ø‚è
-						if(best_gosa == 0 /*|| best_gosa == Number.MIN_VALUE*/){
-							add_bit = bit_max;
-							break;
-						}
-					}
-					// ƒrƒbƒg•‚Å‘Å‚¿Ø‚è
-					if(counter_bit_width > bit_max){
-						break;
-					}
-				}
-			}
-
-			if(result.length){
-				result += "ŒvZI—¹™(TƒÖ¥)v";
-				document.getElementById("result").value = result;
-				if(hdl=="verilog") output_verilog();
-				else output_vhdl();
-			}
-			else{
-				document.getElementById("result").value = "Œó•â‚ª‚ ‚è‚Ü‚¹‚ñBÅ‘åƒrƒbƒg•‚ğ‘‚â‚µ‚Ä‚İ‚Ä‚­‚¾‚³‚¢B";
-			}
-		}
-
-		function output_verilog()
-		{
-			let code = document.getElementById("dds_verilog").innerHTML;
-
-			const base_str = base.toString().split('.').join('');
-			const target_str = target.toString().split('.').join('');
-			code = code.replace("verilog", base_str+"to"+target_str);
-
-			code = code.replace("_COUNT_WIDTH", best_counter_bit_width.toString());
-			code = code.replace("_MAX_NUM", best_counter_bit_width.toString()+"'d"+best_max.toString());
-			code = code.replace("_ADD_NUM", best_counter_bit_width.toString()+"'d"+best_add.toString());
-
-			// &lt; ‚ğ < ‚É’uŠ·
-			code = code.split("&lt;").join('<');
-
-			document.getElementById("hdlcode").value = code;
-		}
-
-		function output_vhdl()
-		{
-			let code = document.getElementById("dds_vhdl").innerHTML;
-
-			const base_str = base.toString().split('.').join('');
-			const target_str = target.toString().split('.').join('');
-			code = code.split("vhdl").join(base_str+"to"+target_str);
-
-			code = code.replace("_COUNT_WIDTH", best_counter_bit_width.toString());
-			code = code.replace("_MAX_NUM", best_max.toString());
-			code = code.replace("_ADD_NUM", best_add.toString());
-
-			// &lt; ‚ğ < ‚É’uŠ·
-			code = code.split("&lt;").join('<');
-			// &gt; ‚ğ > ‚É’uŠ·
-			code = code.split("&gt;").join('>');
-
-			document.getElementById("hdlcode").value = code;
-		}
-	</script>
-
-	<body bgcolor="#FAF3DF" onload="clear()">
-
-<pre hidden id="dds_verilog">
-module dds_verilog (
-	rst, clk, enable
-);
-	input rst, clk;
-	output enable;
-
-	parameter COUNT_WIDTH = _COUNT_WIDTH;
-	parameter ADD_NUM = _ADD_NUM;
-	parameter MAX_NUM = _MAX_NUM;
-
-	wire [COUNT_WIDTH-1:0] add;
-	wire [COUNT_WIDTH-1:0] max;
-	reg  [COUNT_WIDTH-1:0] count;
-	wire [COUNT_WIDTH-1:0] sa;
-
-	assign add = ADD_NUM;
-	assign max = MAX_NUM;
-
-	assign sa = count - max;
-
-	always @(posedge clk) begin
-		if(rst)
-			count <= 0;
-		else if(sa[COUNT_WIDTH-1]) // count < max
-			count <= count + add;
-		else
-			count <= count + add - max;
-	end
-
-	assign enable = ~sa[COUNT_WIDTH-1];
-
-endmodule
-</pre>
-<pre hidden id="dds_vhdl">
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
-use ieee.numeric_std.all;
-
-entity dds_vhdl is
-	port(
-		rst, clk : in std_logic;
-		enable : out std_logic
-	);
-end dds_vhdl;
-
-architecture RTL of dds_vhdl is
-
-constant COUNT_WIDTH : integer := _COUNT_WIDTH;
-constant ADD_NUM : std_logic_vector(COUNT_WIDTH-1 downto 0)
-	:= std_logic_vector(to_unsigned(_ADD_NUM, COUNT_WIDTH));
-constant MAX_NUM : std_logic_vector(COUNT_WIDTH-1 downto 0)
-	:= std_logic_vector(to_unsigned(_MAX_NUM, COUNT_WIDTH));
-
-signal add   : std_logic_vector(COUNT_WIDTH-1 downto 0);
-signal max   : std_logic_vector(COUNT_WIDTH-1 downto 0);
-signal count : std_logic_vector(COUNT_WIDTH-1 downto 0);
-signal sa    : std_logic_vector(COUNT_WIDTH-1 downto 0);
-
-begin
-
-	add <= ADD_NUM;
-	max <= MAX_NUM;
-
-	sa <= count - max;
-
-	process(clk) begin
-		if rising_edge(clk) then
-			if rst='1' then
-				count <= (others => '0');
-			elsif sa(COUNT_WIDTH-1)='1' then -- count < max
-				count <= count + add;
-			else
-				count <= count + add - max;
-			end if;
-		end if;
-	end process;
-
-	enable <= not sa(COUNT_WIDTH-1);
-
-end RTL;
-</pre>
+<!-- [FC2 Analyzer] //analyzer.fc2.com/  -->
+<script language="javascript" src="//analyzer5.fc2.com/ana/processor.php?uid=1044035" type="text/javascript"></script>
+<noscript><div align="right"><img src="//analyzer5.fc2.com/ana/icon.php?uid=1044035&ref=&href=&wid=0&hei=0&col=0" /></div></noscript>
+<!-- [FC2 Analyzer]  -->
 
 <table width="80%" align=center><tr><td>
 
 	<table border=0 width=100%><tr><td>
-	<a href=../../>HOME</a>
+	<a href=../../><b>HOME</b></a>
 	</td><td align=right>
-	2020/04/27
+	2024/10/05
 	</td></tr></table>
 	
 	<hr>
 
-		<h2>DDSiDirect Digital Synthesizerj‚ğ‰—p‚µ‚½”CˆÓƒTƒCƒNƒ‹‚Ì¶¬</h2>
+		<h1>DDSï¼ˆDirect Digital Synthesizerï¼‰ã‚’å¿œç”¨ã—ãŸä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã®ç”Ÿæˆ</h1>
 		<p>
-			FPGA‚ÉÀ‘•‚·‚éƒ^ƒCƒ}‰ñ˜H‚È‚Ç“¯ŠúİŒv‚Å”CˆÓƒTƒCƒNƒ‹‚ğg—p‚µ‚½‚¢‚Æ‚«A
-			ƒx[ƒXƒNƒƒbƒN‚©‚ç”CˆÓƒTƒCƒNƒ‹‚ÌƒCƒl[ƒuƒ‹M†‚ğ¶¬‚·‚é‰ñ˜H‚ğg‚¢‚Ü‚·B
-			‚±‚±‚Å‚Í‚»‚Ì”CˆÓƒTƒCƒNƒ‹‚ğ¶¬‚·‚é‚½‚ß‚Ìƒpƒ‰ƒ[ƒ^‚ğŒvZ‚Å‚«‚Ü‚·B
+			FPGAã«å®Ÿè£…ã™ã‚‹ã‚¿ã‚¤ãƒå›è·¯ãªã©åŒæœŸè¨­è¨ˆã§ä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã‚’ä½¿ç”¨ã—ãŸã„ã¨ãã€
+			ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯ã‹ã‚‰ä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã®ã‚¤ãƒãƒ¼ãƒ–ãƒ«ä¿¡å·ã‚’ç”Ÿæˆã™ã‚‹å›è·¯ã‚’ä½¿ã„ã¾ã™ã€‚
+			ã“ã“ã§ã¯ãã®ä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã‚’ç”Ÿæˆã™ã‚‹ãŸã‚ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¨ˆç®—ã§ãã¾ã™ã€‚
 			<p>
-			‚È‚¨–{‰ñ˜H‚Íƒx[ƒXƒNƒƒbƒNM†‚Ì¸“x‚ÉˆË‘¶‚·‚é‚½‚ßA
-			ƒCƒl[ƒuƒ‹M†‚Ì¸“x‚ğŠ®‘S‚É•ÛØ‚·‚é‚à‚Ì‚Å‚Í‚ ‚è‚Ü‚¹‚ñ‚Ì‚Å‚²—¹³‚­‚¾‚³‚¢B
-			‚Ä‚¢”{‚Í‚Å‚«‚Ü‚¹‚ñB
+			ãªãŠæœ¬å›è·¯ã¯ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯ä¿¡å·ã®ç²¾åº¦ã«ä¾å­˜ã™ã‚‹ãŸã‚ã€
+			ã‚¤ãƒãƒ¼ãƒ–ãƒ«ä¿¡å·ã®ç²¾åº¦ã‚’å®Œå…¨ã«ä¿è¨¼ã™ã‚‹ã‚‚ã®ã§ã¯ã‚ã‚Šã¾ã›ã‚“ã®ã§ã”äº†æ‰¿ãã ã•ã„ã€‚
+			<s>ã¦ã„å€ã¯ã§ãã¾ã›ã‚“</s>é€“å€ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚‚å‡ºã›ã‚‹ã¿ãŸã„ã§ã™ã€‚
 		<p>
-		<table>
+		<table border="0" style="background-color:#eeffee;padding:20px">
 		<tr>
-			<td align="right" valign="top">ƒx[ƒXƒNƒƒbƒN
+			<td style="text-align:right; vertical-align:middle; padding-bottom:1em">ãƒ¢ãƒ¼ãƒ‰ï¼
 			</td>
-			<td>
-				<input type="text" id="base" size="12" value="50000000">Hz<br>
-				<small>ƒNƒƒbƒNü”g”‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B</small>
+			<td style="padding-bottom:1em">
+				<input type="radio" name="mode" value="div" id="mode_div" onClick="ModeSelect('div')" checked><label for="mode_div">åˆ†å‘¨</label>
+				<input type="radio" name="mode" value="mul" id="mode_mul" onClick="ModeSelect('mul')"        ><label for="mode_mul">é€“å€</label>
 			</td>
 		</tr>
 		<tr>
-			<td align="right" valign="top">ƒ^[ƒQƒbƒgƒTƒCƒNƒ‹</td>
-			<td>
-				<input type="text" id="target" size="12" value="1789772.5">ƒTƒCƒNƒ‹<br>
-				<small>ƒ^[ƒQƒbƒgƒTƒCƒNƒ‹”‚ÍƒNƒƒbƒNü”g”ˆÈ‰º‚Å‚·B</small>
+			<td style="text-align:right; vertical-align:top; padding-bottom:1em">ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯ï¼
 			</td>
-		</tr>
-			<td align="right" valign="top" nowrap>ƒJƒEƒ“ƒ^Å‘åƒrƒbƒg•</td>
-			<td>
-				<input type="text" id="bit_max" size="12" value="30">bit<br>
-				<small>ŒvZ‚·‚éƒJƒEƒ“ƒ^‚Ìƒrƒbƒg•‚ª‘å‚«‚¢‚Ù‚Ç¸“x‚ª—Ç‚­‚È‚è‚Ü‚·B<br>
-					Œë·‚ª0‚É‚È‚ê‚Î‚»‚±‚ÅŒvZ‚ğ‘Å‚¿Ø‚è‚Ü‚·B</small>
+			<td style="padding-bottom:1em">
+				<input type="text" id="base_clock" size="12" style="text-align:right;font-size:1em" value="50000000" onInput="convertToPrefixedNumber('base_clock', 'base_prefix')">ã€€<span id="base_prefix"></span>Hz<br>
+				<!-- <small>ã‚¯ãƒ­ãƒƒã‚¯å‘¨æ³¢æ•°ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚</small> -->
 			</td>
 		</tr>
 		<tr>
-			<td align="right" valign="top">HDLo—ÍF</td>
+			<td style="text-align:right; vertical-align:top; padding-bottom:1em">ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ï¼</td>
+			<td style="padding-bottom:1em">
+				<input type="text" id="target_cycle" size="12" style="text-align:right;font-size:1em" value="5369318" onInput="convertToPrefixedNumber('target_cycle', 'target_prefix')">ã€€<span id="target_prefix"></span>ã‚µã‚¤ã‚¯ãƒ«<br>
+				<!-- <small>ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«æ•°ã¯ã‚¯ãƒ­ãƒƒã‚¯å‘¨æ³¢æ•°ä»¥ä¸‹ã§ã™ã€‚</small> -->
+			</td>
+		</tr>
+			<td style="text-align:right; vertical-align:top; padding-bottom:1em; white-space:nowrap">ã‚«ã‚¦ãƒ³ã‚¿æœ€å¤§ãƒ“ãƒƒãƒˆå¹…ï¼</td>
+			<td style="padding-bottom:1em">
+				<input type="text" id="bit_max" size="12" style="text-align:right;font-size:1em" value="30"> bit<br>
+				<small>è¨ˆç®—ã™ã‚‹ã‚«ã‚¦ãƒ³ã‚¿ã®ãƒ“ãƒƒãƒˆå¹…ãŒå¤§ãã„ã»ã©ç²¾åº¦ãŒè‰¯ããªã‚Šã¾ã™ã€‚<br>
+					èª¤å·®ãŒ0ã«ãªã‚Œã°ãã“ã§è¨ˆç®—ã‚’æ‰“ã¡åˆ‡ã‚Šã¾ã™ã€‚</small>
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:right; vertical-align:top; padding-bottom:1em">HDLå‡ºåŠ›ï¼š</td>
+			<td style="padding-bottom:1em">
+				<input type="radio" name="hdl_type" value="verilog" id="hdl_verilog" checked><label for="hdl_verilog">VerilogHDL</label>
+				<input type="radio" name="hdl_type" value="vhdl"    id="hdl_vhdl"           ><label for="hdl_vhdl">VHDL</label>
+				<input type="radio" name="hdl_type" value="sflp"    id="hdl_sflp"           ><label for="hdl_sflp">SFL+</label>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
 			<td>
-				<input type="radio" name="hdl" value="verilog" checked>VerilogHDL
-				<input type="radio" name="hdl" value="vhdl">VHDL
+				<input type="button" id="run" value="è¨ˆç®—ã™ã‚‹" onclick="dds_calc()">
 			</td>
 		</tr>
 		</table>
-		<input type="button" id="run" value="ŒvZ‚·‚é" onclick="dds_calc()">
 		<p>
 		
-			<textarea id="result" spellcheck="false" rows="10" cols="100"></textarea>
+			<!--
+			<textarea id="result_text" spellcheck="false" rows="1" cols="100"></textarea>
+			-->
+			logï¼š<input type="text" id="result_text" size="60" readonly>
 			<p>
-			<textarea id="hdlcode" spellcheck="false" rows="20" cols="80"></textarea>
+			è¨ˆç®—çµæœï¼šè¨±å®¹ã§ãã‚‹èª¤å·®ã®ãƒ“ãƒƒãƒˆå¹…ã‚’é¸æŠã—ã¦ãã ã•ã„ã€‚<br>
+			<select id="result_select" spellcheck="false" size="2" style="overflow:hidden;font-size:1em"></select>
+			<p>
+			HDLå‡ºåŠ›ï¼š<br>
+			<textarea id="hdl_code" spellcheck="false" rows="30" cols="80" readonly></textarea>
 		<p>
 
 		<hr>
-		<h3>‰ğà</h3>
-DDS‚ğ‰—p‚µ‚½ƒJƒEƒ“ƒ^‚Åƒx[ƒXƒNƒƒbƒN‚©‚ç”CˆÓƒTƒCƒNƒ‹‚ÌƒCƒl[ƒuƒ‹M†‚ğ¶¬‚µ‚Ü‚·B
-“Á’¥‚ÍƒCƒl[ƒuƒ‹M†‚ª•Î‚Á‚Ä‚¢‚È‚¢‚±‚Æ‚Å‚·B
-FPGA‚Å‚Ì“¯ŠúİŒv‚Ì‚Æ‚«‚É”CˆÓƒTƒCƒNƒ‹¶¬‰ñ˜H‚Æ‚µ‚Äg—p‚µ‚Ü‚·B
-”ñ“¯Šú‰ñ˜H‚¶‚á‚È‚­‚Ä‚æ‚¢ê‡‚Í‚±‚¤‚¢‚¤è‚à‚ ‚é‚©‚È‚ÆB
+		<h2>è§£èª¬</h2>
+		<h3>åˆ†å‘¨ãƒ¢ãƒ¼ãƒ‰ã«ã¤ã„ã¦</h3>
+DDSã‚’å¿œç”¨ã—ãŸã‚«ã‚¦ãƒ³ã‚¿ã§ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯ã‹ã‚‰ä»»æ„ã‚µã‚¤ã‚¯ãƒ«ã®ã‚¤ãƒãƒ¼ãƒ–ãƒ«ä¿¡å·ã‚’ç”Ÿæˆã—ã¾ã™ã€‚
+ç‰¹å¾´ã¯ã‚¤ãƒãƒ¼ãƒ–ãƒ«ä¿¡å·ãŒåã£ã¦ã„ãªã„ã“ã¨ã§ã™ã€‚
+FPGAã§ã®åŒæœŸè¨­è¨ˆã®ã¨ãã«ä»»æ„ã‚µã‚¤ã‚¯ãƒ«ç”Ÿæˆå›è·¯ã¨ã—ã¦ä½¿ç”¨ã—ã¾ã™ã€‚
+éåŒæœŸå›è·¯ã˜ã‚ƒãªãã¦ã‚ˆã„å ´åˆã¯ã“ã†ã„ã†æ‰‹ã‚‚ã‚ã‚‹ã‹ãªã¨ã€‚
 <p>
-—á‚¦‚ÎŠÈ’P‚È—á‚¾‚ÆAƒx[ƒXƒNƒƒbƒN50MHz‚Åƒ^[ƒQƒbƒgƒTƒCƒNƒ‹‚ª30MHz‚Å‚ ‚ê‚ÎA
-‚»‚Ì”ä‚Í5:3‚È‚Ì‚ÅAƒpƒ‰ƒ[ƒ^‚Í‚»‚ê‚¼‚ê‰ÁZ’l3AÅ‘å’l5‚Æ‚È‚è‚Ü‚·B
+ä¾‹ãˆã°ç°¡å˜ãªä¾‹ã ã¨ã€ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯50MHzã§ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ãŒ30MHzã§ã‚ã‚Œã°ã€
+ãã®æ¯”ã¯5:3ãªã®ã§ã€ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã¯ãã‚Œãã‚ŒåŠ ç®—å€¤3ã€æœ€å¤§å€¤5ã¨ãªã‚Šã¾ã™ã€‚
 <p>
-	ˆÈ‰º‚Í‹^—ƒR[ƒh‚Å‚·B
+	ä»¥ä¸‹ã¯ç–‘ä¼¼ã‚³ãƒ¼ãƒ‰ã§ã™ã€‚
 <table cellpadding="10" bgcolor="#EEFFEE"><tr><td><pre>
-module dds
+circuit DDS_5to3
 {
 	input rst, clk;
 	output enable;
 
-	wire add = 3; // ‰ÁZ’l
-	wire max = 5; // Å‘å’l
+	wire add = 3; // åŠ ç®—å€¤
+	wire max = 5; // æœ€å¤§å€¤
 	reg count;
 
 	if(clk){
@@ -365,44 +148,494 @@ module dds
 }
 </pre></td></tr></table>
 <p>
-‚TƒNƒƒbƒN‚É‚R‰ñenableM†‚ªHi‚É‚È‚è‚Ü‚·B‚±‚ê‚ÍŠÈ’P‚Å‚·‚ËB
-‚ ‚­‚Ü‚ÅƒCƒl[ƒuƒ‹M†‚Å‚ ‚èA30MHz‚ÌƒNƒƒbƒN‚Å‚Í‚È‚¢‚±‚Æ‚É’ˆÓ‚µ‚Ä‚­‚¾‚³‚¢B<br>
+ï¼•ã‚¯ãƒ­ãƒƒã‚¯ã«ï¼“å›enableä¿¡å·ãŒHiã«ãªã‚Šã¾ã™ã€‚ã“ã‚Œã¯ç°¡å˜ã§ã™ã­ã€‚
+ã‚ãã¾ã§ã‚¤ãƒãƒ¼ãƒ–ãƒ«ä¿¡å·ã§ã‚ã‚Šã€30MHzã®ã‚¯ãƒ­ãƒƒã‚¯ã§ã¯ãªã„ã“ã¨ã«æ³¨æ„ã—ã¦ãã ã•ã„ã€‚<br>
 <img src=wave.png>
 <p>
-	ˆá‚¤—á‚Å‚ÍAƒx[ƒXƒNƒƒbƒN50MHz‚Åƒ^[ƒQƒbƒgƒTƒCƒNƒ‹‚ª33.8688MHziPlayStation‚ÌCPUü”g”j‚¾‚ÆA
-	Å‘åŒö–ñ”‚ª3200‚Å‚·‚ËB
-	‚»‚ê‚¼‚êÅ‘åŒö–ñ”‚ÅŠ„‚é‚ÆA‰ÁZ’l10584AÅ‘å’l15625‚Æ‚È‚è‚Ü‚·B
-	‚±‚ê‚Í12bit‚ÌƒJƒEƒ“ƒ^‚ğg‚¤‚±‚Æ‚ÅŒë·‚ª0‚Æ‚È‚èAÅ‘åŒö–ñ”‚ª‘å‚«‚¢‚Ù‚ÇƒJƒEƒ“ƒ^‚Ìƒrƒbƒg•‚ª­‚È‚­‚ÄÏ‚Ş‚í‚¯‚Å‚·B
-	i‚±‚±‚Å‚ÌŒë·‚Æ‚ÍA—‘z“I‚Èƒ^[ƒQƒbƒgü”g”‚ÆÀÛ‚ÌƒCƒl[ƒuƒ‹ƒTƒCƒNƒ‹‚Ì·j
+	é•ã†ä¾‹ã§ã¯ã€ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯50MHzã§ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ãŒ33.8688MHzï¼ˆPlayStationã®CPUå‘¨æ³¢æ•°ï¼‰ã ã¨ã€
+	æœ€å¤§å…¬ç´„æ•°ãŒ3200ã§ã™ã€‚
+	ãã‚Œãã‚Œæœ€å¤§å…¬ç´„æ•°ã§å‰²ã‚‹ã¨ã€åŠ ç®—å€¤10584ã€æœ€å¤§å€¤15625ã¨ãªã‚Šã¾ã™ã€‚
+	ã“ã‚Œã¯12bitã®ã‚«ã‚¦ãƒ³ã‚¿ã‚’ä½¿ã†ã“ã¨ã§èª¤å·®ãŒ0ã¨ãªã‚Šã€æœ€å¤§å…¬ç´„æ•°ãŒå¤§ãã„ã»ã©ã‚«ã‚¦ãƒ³ã‚¿ã®ãƒ“ãƒƒãƒˆå¹…ãŒå°‘ãªãã¦æ¸ˆã‚€ã‚ã‘ã§ã™
+	ï¼ˆã“ã“ã§ã®èª¤å·®ã¨ã¯ã€ç†æƒ³çš„ãªã‚¿ãƒ¼ã‚²ãƒƒãƒˆå‘¨æ³¢æ•°ã¨å®Ÿéš›ã®ã‚¤ãƒãƒ¼ãƒ–ãƒ«ã‚µã‚¤ã‚¯ãƒ«ã®å·®ï¼‰ã€‚
 <p>
-	‚Å‚ÍÅ‘åŒö–ñ”‚ª¬‚³‚¢ê‡‚Ç‚¤‚µ‚Ü‚µ‚å‚¤‚©H
-	‚à‚¿‚ë‚ñƒJƒEƒ“ƒ^‚Ìbit•‚ğ‘‚â‚¹‚Î‘‚â‚·‚Ù‚ÇŒë·‚Í¬‚³‚­‚È‚è‚Ü‚·B
-	‚½‚¾‚µAŒë·‚Í¬‚³‚­‚µ‚½‚¢‚¯‚ÇAƒJƒEƒ“ƒ^‚Ìƒrƒbƒg•‚à‚Å‚«‚é‚¾‚¯¬‚³‚­‚µ‚½‚¢B
-	‚»‚±‚Å“KØ‚È‰ÁZ’l‚ÆÅ‘å’l‚ğƒpƒ‰ƒ[ƒ^‚Æ‚µ‚ÄŒ©‚Â‚¯‚é•K—v‚ª‚ ‚è‚Ü‚·B
+	ã§ã¯æœ€å¤§å…¬ç´„æ•°ãŒå°ã•ã„å ´åˆã©ã†ã—ã¾ã—ã‚‡ã†ã‹ï¼Ÿ
+	ã‚‚ã¡ã‚ã‚“ã‚«ã‚¦ãƒ³ã‚¿ã®bitå¹…ã‚’å¢—ã‚„ã›ã°å¢—ã‚„ã™ã»ã©èª¤å·®ã¯å°ã•ããªã‚Šã¾ã™ã€‚
+	ãŸã ã—ã€èª¤å·®ã¯å°ã•ãã—ãŸã„ã‘ã©ã€ã‚«ã‚¦ãƒ³ã‚¿ã®ãƒ“ãƒƒãƒˆå¹…ã‚‚ã§ãã‚‹ã ã‘å°ã•ãã—ãŸã„ã€‚
+	ãã“ã§é©åˆ‡ãªåŠ ç®—å€¤ã¨æœ€å¤§å€¤ã‚’ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã¨ã—ã¦è¦‹ã¤ã‘ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
 	<p>
-	—á‚¦‚Îƒtƒ@ƒ~ƒRƒ“‚Ì•`‰æƒvƒƒZƒbƒT‚Ì“®ìü”g”‚Í5.369318MHz‚Å‚·B
-	‚±‚ê‚ğƒx[ƒXƒNƒƒbƒN50MHz‚©‚ç¶¬‚·‚é‚Æ‚È‚é‚ÆAƒpƒ‰ƒ[ƒ^’TõŒ‹‰Ê‚ÍˆÈ‰º‚Ì’Ê‚èB
+	ä¾‹ãˆã°ãƒ•ã‚¡ãƒŸã‚³ãƒ³ã®æç”»ãƒ—ãƒ­ã‚»ãƒƒã‚µã®å‹•ä½œå‘¨æ³¢æ•°ã¯5.369318MHzã§ã™ã€‚
+	ã“ã‚Œã‚’ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯50MHzã‹ã‚‰ç”Ÿæˆã™ã‚‹ã¨ãªã‚‹ã¨ã€ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿æ¢ç´¢çµæœã¯ä»¥ä¸‹ã®é€šã‚Šã€‚
 <pre>
-	ƒJƒEƒ“ƒ^ 5bit  ‰ÁZ’l=      1  Å‘å’l=       9  Œë·:186237.55555555596947669983
-	ƒJƒEƒ“ƒ^ 6bit  ‰ÁZ’l=      3  Å‘å’l=      28  Œë·: 12175.14285714272409677505
-	ƒJƒEƒ“ƒ^ 8bit  ‰ÁZ’l=     13  Å‘å’l=     121  Œë·:  2582.82644628081470727921
-	ƒJƒEƒ“ƒ^ 9bit  ‰ÁZ’l=     16  Å‘å’l=     149  Œë·:   190.48322147689759731293
-	ƒJƒEƒ“ƒ^11bit  ‰ÁZ’l=    109  Å‘å’l=    1015  Œë·:   140.12807881738990545273
-	ƒJƒEƒ“ƒ^12bit  ‰ÁZ’l=    189  Å‘å’l=    1760  Œë·:     0.18181818164885044098
-	ƒJƒEƒ“ƒ^18bit  ‰ÁZ’l=  14002  Å‘å’l=  130389  Œë·:     0.03606132417917251587
-	ƒJƒEƒ“ƒ^19bit  ‰ÁZ’l=  16837  Å‘å’l=  156789  Œë·:     0.00062504410743713379
-	ƒJƒEƒ“ƒ^20bit  ‰ÁZ’l=  50322  Å‘å’l=  468607  Œë·:     0.00005548354238271713
-	ƒJƒEƒ“ƒ^22bit  ‰ÁZ’l= 218125  Å‘å’l= 2031217  Œë·:     0.00000295415520668030
-	ƒJƒEƒ“ƒ^24bit  ‰ÁZ’l= 822178  Å‘å’l= 7656261  Œë·:     0.00000026077032089233
-	ƒJƒEƒ“ƒ^26bit  ‰ÁZ’l=2684659  Å‘å’l=25000000  Œë·:     0.00000000000000000000
+	ã‚«ã‚¦ãƒ³ã‚¿ 5bit  åŠ ç®—å€¤=      1  æœ€å¤§å€¤=       9  èª¤å·®=+186237.55555555596947669983
+	ã‚«ã‚¦ãƒ³ã‚¿ 6bit  åŠ ç®—å€¤=      3  æœ€å¤§å€¤=      28  èª¤å·®= -12175.14285714272409677505
+	ã‚«ã‚¦ãƒ³ã‚¿ 8bit  åŠ ç®—å€¤=     13  æœ€å¤§å€¤=     121  èª¤å·®=  +2582.82644628081470727921
+	ã‚«ã‚¦ãƒ³ã‚¿ 9bit  åŠ ç®—å€¤=     16  æœ€å¤§å€¤=     149  èª¤å·®=   -190.48322147689759731293
+	ã‚«ã‚¦ãƒ³ã‚¿11bit  åŠ ç®—å€¤=    109  æœ€å¤§å€¤=    1015  èª¤å·®=   +140.12807881738990545273
+	ã‚«ã‚¦ãƒ³ã‚¿12bit  åŠ ç®—å€¤=    189  æœ€å¤§å€¤=    1760  èª¤å·®=     +0.18181818164885044098
+	ã‚«ã‚¦ãƒ³ã‚¿18bit  åŠ ç®—å€¤=  14002  æœ€å¤§å€¤=  130389  èª¤å·®=     -0.03606132417917251587
+	ã‚«ã‚¦ãƒ³ã‚¿19bit  åŠ ç®—å€¤=  16837  æœ€å¤§å€¤=  156789  èª¤å·®=     +0.00062504410743713379
+	ã‚«ã‚¦ãƒ³ã‚¿20bit  åŠ ç®—å€¤=  50322  æœ€å¤§å€¤=  468607  èª¤å·®=     -0.00005548354238271713
+	ã‚«ã‚¦ãƒ³ã‚¿22bit  åŠ ç®—å€¤= 218125  æœ€å¤§å€¤= 2031217  èª¤å·®=     -0.00000295415520668030
+	ã‚«ã‚¦ãƒ³ã‚¿24bit  åŠ ç®—å€¤= 822178  æœ€å¤§å€¤= 7656261  èª¤å·®=     +0.00000026077032089233
+	ã‚«ã‚¦ãƒ³ã‚¿26bit  åŠ ç®—å€¤=2684659  æœ€å¤§å€¤=25000000  èª¤å·®=      0.00000000000000000000
 </pre>
 
-Œ‹‰ÊAƒJƒEƒ“ƒ^‚ª26bit‚ ‚ê‚ÎŒë·0‚ÌƒCƒl[ƒuƒ‹ƒTƒCƒNƒ‹‚ªì‚ê‚Ü‚·B
-‚½‚¾Aiƒx[ƒXƒNƒƒbƒN©‘Ì‚ÌŒë·‚©‚çŒ©‚Ä\•ª¬‚³‚¢Œë·‚©‚Ç‚¤‚©”»’f‚µ‚Äj
-Œë·‚ğ‚¢‚­‚ç‚©‹–—e‚·‚é‚È‚ç‚ÎA
-ƒJƒEƒ“ƒ^12bit‚ ‚½‚è‚Ì‰ÁZ’l‚ÆÅ‘å’l‚ğ‘I‘ğ‚·‚é‚±‚Æ‚Åƒrƒbƒg•‚ğ—}‚¦‚é‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+çµæœã€ã‚«ã‚¦ãƒ³ã‚¿ãŒ26bitã‚ã‚Œã°èª¤å·®0ã®ã‚¤ãƒãƒ¼ãƒ–ãƒ«ã‚µã‚¤ã‚¯ãƒ«ãŒä½œã‚Œã¾ã™ã€‚
+ãŸã ã€ï¼ˆãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯è‡ªä½“ã®èª¤å·®ã‹ã‚‰è¦‹ã¦ååˆ†å°ã•ã„èª¤å·®ã‹ã©ã†ã‹åˆ¤æ–­ã—ã¦ï¼‰
+èª¤å·®ã‚’ã„ãã‚‰ã‹è¨±å®¹ã™ã‚‹ãªã‚‰ã°ã€
+ã‚«ã‚¦ãƒ³ã‚¿18bitã‚ãŸã‚Šã®åŠ ç®—å€¤ã¨æœ€å¤§å€¤ã‚’é¸æŠã™ã‚‹ã“ã¨ã§ã€
+ãƒ¬ã‚¸ã‚¹ã‚¿æ•°ã¨å›è·¯è¦æ¨¡ã‚’æŠ‘åˆ¶ã™ã‚‹ã“ã¨ãŒã§ãã¾ã™ã€‚
+<p>
+ã¾ãŸã€ã“ã“ã§èª¤å·®ã®ãƒ—ãƒ©ã‚¹ã¯ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ã«å¯¾ã—é€Ÿã„ã‚µã‚¤ã‚¯ãƒ«ãŒã€
+ãƒã‚¤ãƒŠã‚¹ã¯é…ã„ã‚µã‚¤ã‚¯ãƒ«ãŒç”Ÿæˆã•ã‚Œã‚‹ã“ã¨ã‚’æ„å‘³ã—ã¾ã™ã€‚
+å‹•ä½œæœŸé–“ãŒæ±ºã¾ã£ã¦ã„ã‚‹å ´åˆã€é…ã„ã‚µã‚¤ã‚¯ãƒ«ã ã¨é–“ã«åˆã‚ãªããªã‚‹ã“ã¨ãŒã‚ã‚‹ãŸã‚ã€
+é€Ÿã„ã‚µã‚¤ã‚¯ãƒ«ã‚’ä½¿ç”¨ã™ã‚‹æ–¹ãŒè‰¯ã„ã‚ˆã†ã§ã™ã€‚
+
+<h3>é€“å€ãƒ¢ãƒ¼ãƒ‰ã«ã¤ã„ã¦</h3>
+
+PLLã®IPã‚’ä½¿ç”¨ã™ã‚‹ã¨ãã€IPã‚¸ã‚§ãƒãƒ¬ãƒ¼ã‚¿ã§ã‚¿ãƒ¼ã‚²ãƒƒãƒˆå‘¨æ³¢æ•°ã‚’æŒ‡å®šã™ã‚‹ã‹ã¨æ€ã„ã¾ã™ã€‚
+å ´åˆã«ã‚ˆã£ã¦åˆ†å‘¨ãƒ»é€“å€ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãŒä¸æ˜ãªå ´åˆã«ã€
+ã“ã®è¨ˆç®—æ©Ÿã®ã€Œé€“å€ãƒ¢ãƒ¼ãƒ‰ã€ã§ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ã‚’æŒ‡å®šã™ã‚Œã°ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãŒåˆ†ã‹ã‚Šã¾ã™ã€‚
+ãªã‚“ã‹åŒã˜ãƒ­ã‚¸ãƒƒã‚¯ã§å‹•ã„ãŸã®ã§è¿½åŠ ã—ã¾ã—ãŸã€‚
+<p>
+ä¾‹ãˆã°ã€27MHzã‹ã‚‰HDMIç”¨ã«124.875MHzã‚’ç”Ÿæˆã—ãŸãPLLã‚’ç”Ÿæˆã—ãŸã¨ãã€
+ã‚¿ã‚¤ãƒŸãƒ³ã‚°åˆ¶ç´„ã§æŒ‡å®šã™ã‚‹ -multiply_by ã¨ -divide_by ã®å€¤ãŒå¿…è¦ã§ã™ã€‚
+ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿æ¢ç´¢çµæœã¯ä»¥ä¸‹ã®é€šã‚Šã€‚
+<pre>
+	å‡ºåŠ›å‘¨æ³¢æ•°=108000000Hz Mul= 4 Div=1 èª¤å·®=-16875000.000000
+	å‡ºåŠ›å‘¨æ³¢æ•°=135000000Hz Mul= 5 Div=1 èª¤å·®=+10125000.000000
+	å‡ºåŠ›å‘¨æ³¢æ•°=121500000Hz Mul= 9 Div=2 èª¤å·®= -3375000.000000
+	å‡ºåŠ›å‘¨æ³¢æ•°=126000000Hz Mul=14 Div=3 èª¤å·®= +1125000.000000
+	å‡ºåŠ›å‘¨æ³¢æ•°=124200000Hz Mul=23 Div=5 èª¤å·®=  -675000.000000
+	å‡ºåŠ›å‘¨æ³¢æ•°=124875000Hz Mul=37 Div=8 èª¤å·®=        0.000000
+</pre>
+Mul=37 Div=8 ãŒåˆ†ã‹ã‚Šã¾ã—ãŸã€‚
+ã¾ãã€å…¥å‡ºåŠ›å‘¨æ³¢æ•°ã‚’ãã‚Œãã‚Œæœ€å¤§å…¬ç´„æ•°3375000ã§å‰²ã‚Œã°å‡ºã¦ãã‚‹ã‚“ã§ã™ã‘ã©ã­ã€‚
+ã‚ã¨å¤§æŠµã€IPã‚¸ã‚§ãƒãƒ¬ãƒ¼ã‚¿ãŒç”Ÿæˆã—ãŸãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ã‹ã‚Œã¦ã¾ã™ã€‚
+
+
 <hr>
 <center>Copyright(C)2020 pgate1 All Rights Reserved.</center>
-	</td></tr></table>
-	</body>
+</td></tr></table>
+
+<div style="padding:5em"></div>
+
+<script language="javascript" type="text/javascript">
+
+	let result_select = [];
+
+	function clear()
+	{
+		document.getElementById("result_text").value = "";
+		document.getElementById("result_select").innerHTML = "";
+		result_select.length = 0;
+		document.getElementById("hdl_code").value = "";
+
+		convertToPrefixedNumber('base_clock', 'base_prefix');
+		convertToPrefixedNumber('target_cycle', 'target_prefix');
+	}
+	
+	function ModeSelect(mode)
+	{
+		if(mode=="div"){
+			document.getElementById("base_clock").value = 50000000; // DE0
+			document.getElementById("target_cycle").value = 5369318; // NES PPU
+			document.getElementById("bit_max").value = 30;
+		}
+		if(mode=="mul"){
+			document.getElementById("base_clock").value = 27000000; // TangNano9K
+			document.getElementById("target_cycle").value = 124875000; // HDMI	
+			document.getElementById("bit_max").value = 8;
+		}
+
+		clear();
+	}
+
+	function convertToPrefixedNumber(number_input, number_prefix)
+	{
+		let input = document.getElementById(number_input).value;
+		let output = document.getElementById(number_prefix);
+		let number = parseFloat(input);
+
+		if(isNaN(number)){
+			output.textContent = " ";
+			return;
+		}
+
+		let decimal_place = 0;
+		let number_str = number.toString(); // å°æ•°ç‚¹ä»¥ä¸‹15æ¡ç›®ã¾ã§
+		if(number_str.includes('.')){
+			// å°æ•°ç‚¹ä»¥ä¸‹ã®éƒ¨åˆ†ã®é•·ã•ã‚’å–å¾—
+			decimal_place = number_str.split('.')[1].length;
+		}
+		//document.getElementById("result_text").value = decimal_place.toString();
+		// å°æ•°ç‚¹ä»¥ä¸‹ãŒã‚ã‚‹ãªã‚‰å°æ•°ç‚¹ä»¥ä¸‹æœ‰åŠ¹æ¡æ•°ã‚’ç¢ºä¿ã™ã‚‹
+		// ã€€4005.03ãŒ4.0050300000000005ã«ãªã‚‰ãªã„ã‚ˆã†ã«
+
+		if(number >= 1_000_000_000_000){
+			let divided_number = number / 1_000_000_000_000;
+			if(divided_number.toString().includes('.')) decimal_place += 12;
+			output.textContent = parseFloat(divided_number.toFixed(decimal_place)) + " T";
+		}
+		else if(number >= 1_000_000_000){
+			let divided_number = number / 1_000_000_000;
+			if(divided_number.toString().includes('.')) decimal_place += 9;
+			output.textContent = parseFloat(divided_number.toFixed(decimal_place)) + " G";
+		}
+		else if(number >= 1_000_000){ 
+			let divided_number = number / 1_000_000;
+			if(divided_number.toString().includes('.')) decimal_place += 6;
+			output.textContent = parseFloat(divided_number.toFixed(decimal_place)) + " M";
+		}
+		else if(number >= 1_000){ 
+			let divided_number = number / 1_000;
+			if(divided_number.toString().includes('.')) decimal_place += 3;
+			output.textContent = parseFloat(divided_number.toFixed(decimal_place)) + " k";
+		}
+		else{ // 1,000 > n > 0
+			output.textContent = number.toFixed(decimal_place) + " ";
+		}
+	}
+
+	function euclid(a, b)
+	{
+		if(b==0) return a;
+		return euclid(b, a % b);
+	}
+
+	let mode;
+	let base, target;
+
+	function dds_calc()
+	{
+		clear();
+
+		let mode_elements = document.getElementsByName("mode");
+		if (mode_elements.item(0).checked) mode = "div";
+		if (mode_elements.item(1).checked) mode = "mul";
+
+		base = parseFloat(document.getElementById("base_clock").value);
+		//alert(base.toString());
+		if(base==="" || isNaN(base) || base<=0){
+			document.getElementById("result_text").value = "ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯ã¯æ­£ã®å®Ÿæ•°ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚";
+			return;
+		}
+		target = parseFloat(document.getElementById("target_cycle").value);
+		if(target==="" || isNaN(target) || target<=0){
+			document.getElementById("result_text").value = "ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ã¯æ­£ã®å®Ÿæ•°ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚";
+			return;
+		}
+		if(mode=="div" && target > base){
+			document.getElementById("result_text").value = "ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ã¯ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯ä»¥ä¸‹ã¨ã—ã¦ãã ã•ã„ã€‚";
+			return;
+		}
+		/*
+		if(mode=="mul" && target < base){
+			document.getElementById("result_text").value = "ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã‚µã‚¤ã‚¯ãƒ«ã¯ãƒ™ãƒ¼ã‚¹ã‚¯ãƒ­ãƒƒã‚¯ä»¥ä¸Šã¨ã—ã¦ãã ã•ã„ã€‚";
+			return;
+		}
+		*/
+		let bit_max = document.getElementById("bit_max").value;
+		let integerPattern = /^\d+$/; // æ•°å­—ã®ã¿ã‹ã®æ­£è¦è¡¨ç¾
+		if(bit_max==="" || !integerPattern.test(bit_max) || bit_max<=0){
+			document.getElementById("result_text").value = "ã‚«ã‚¦ãƒ³ã‚¿æœ€å¤§ãƒ“ãƒƒãƒˆå¹…ã¯1ä»¥ä¸Šã‚’å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚";
+			return;
+		}
+		bit_max = parseInt(bit_max);
+
+		/*
+		//alert(target.toString() + " " + base.toString());
+		if(target > base){
+			document.getElementById("result_text").value = "ã¦ã„å€ã¯ã§ãã¾ã›ã‚“ã€‚";
+			return;
+		}
+		*/
+
+		const gcd = euclid(Math.floor(base), Math.floor(target));
+		const lcm = base * target / gcd;
+		//alert("æœ€å¤§å…¬ç´„æ•°"+gcd.toString()+" æœ€å°å…¬å€æ•°"+lcm.toString());
+		if(gcd == 1){
+			if(window.confirm("æœ€å¤§å…¬ç´„æ•°ãŒ1ã®ãŸã‚ã€å‡¦ç†ã«æ™‚é–“ãŒã‹ã‹ã‚‹å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚\nå®Ÿè¡Œã—ã¾ã™ã‹ï¼Ÿ") == false){
+				document.getElementById("result_text").value = "ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã—ã¾ã—ãŸã€‚";
+				return;
+			}
+		}
+
+		document.getElementById("result_text").value = "è¨ˆç®—ä¸­...";
+
+		let best_counter_bit_width = 0, best_add, best_max;
+		let result = "";
+		let result_count = 0;
+		let best_gosa = base;
+		let add_bit;
+		for(add_bit=1; add_bit<bit_max; add_bit++){
+			let add;
+			for(add=1<<(add_bit-1); add<1<<add_bit; add++){
+				
+				const max = Math.round(add * base / target); // å››æ¨äº”å…¥
+			//	const max = Math.floor(add * base / target); // åˆ‡ã‚Šæ¨ã¦
+			//	const max = Math.ceil(add * base / target); // åˆ‡ã‚Šä¸Šã’
+				// ã‚«ã‚¦ãƒ³ã‚¿ã®ãƒ“ãƒƒãƒˆå¹…ã‚’æ±‚ã‚ã‚‹
+				const counter_bit_width = max.toString(2).length + 1;
+				//alert(375.toString(2).length); return;
+
+			//	const hz = base * (add / max); // èª¤å·®ãŒå¤§ãã„
+				const hz = base * add / max;
+				const gosa = hz - target; // ç®—å‡ºã—ãŸhzã®æ–¹ãŒå¤§ãã„æ™‚ã¯èª¤å·®ã¯ãƒ—ãƒ©ã‚¹ã«ã™ã‚‹
+				if(Math.abs(gosa) < Math.abs(best_gosa) && counter_bit_width <= bit_max ){
+					best_add = add;
+					best_max = max;
+					best_gosa = gosa;
+					//alert(hz.toString());
+		
+					// èª¤å·®(PPM:Parts Per Million)
+					const best_ppm = 1000000 * Math.abs(best_gosa) / target;
+
+					let str = "";
+					str += "ã‚«ã‚¦ãƒ³ã‚¿" + counter_bit_width.toString() + "bit ";
+				//	str += hz.toFixed(12) + "Hz ";
+					str += "åŠ ç®—å€¤=" + best_add.toString() /*+ "(0x" + best_add.toString(16).toUpperCase() + ")"*/ + " ";
+					str += "æœ€å¤§å€¤=" + best_max.toString() /*+ "(0x" + best_max.toString(16).toUpperCase() + ")"*/ + " ";
+					str += "èª¤å·®=" + (best_gosa > 0 ? "+" : "") + best_gosa.toFixed(20) + " ";
+				//	str += best_ppm.toFixed(10) + "ppm";
+					str += "\n";
+
+					// å‰å›ã®è¨˜éŒ²ã¨åŒã˜ãƒ“ãƒƒãƒˆå¹…ãªã‚‰ä¸Šæ›¸ãã™ã‚‹
+					if(mode=="div" && counter_bit_width == best_counter_bit_width){
+						const p = result.lastIndexOf("ã‚«ã‚¦ãƒ³ã‚¿");
+						if(p != -1){
+							result = result.slice(0, p);
+						}
+					}
+					result += str;
+					best_counter_bit_width = counter_bit_width;
+
+					if(mode=="div"){
+						result_select[counter_bit_width] = {add:best_add, max:best_max, gosa:best_gosa, ppm:best_ppm};
+					}
+					if(mode=="mul"){
+						result_select[result_count] = {add:best_add, max:best_max, gosa:best_gosa, hz:hz};
+						result_count++;
+					}
+
+					// èª¤å·®0ã§è¨ˆç®—æ‰“ã¡åˆ‡ã‚Š
+					if(best_gosa == 0 /*|| best_gosa == Number.MIN_VALUE*/){
+						add_bit = bit_max;
+						break;
+					}
+				}
+				// ãƒ“ãƒƒãƒˆå¹…ã§æ‰“ã¡åˆ‡ã‚Š
+				if(counter_bit_width > bit_max){
+					break;
+				}
+			}
+		}
+
+		if(result.length){
+			//result += "è¨ˆç®—çµ‚äº†â˜†(ã‚Ï‰ï½¥)v";
+			result = "è¨ˆç®—çµ‚äº†â˜†(ã‚Ï‰ï½¥)v";
+			document.getElementById("result_text").value = result;
+
+			let select = document.getElementById("result_select");
+			select.size = Object.keys(result_select).length;
+			result_select.forEach(function(obj, index){
+				//console.log(index.toString() + ", " + obj.add.toString());
+				let str = "";
+				if(mode=="div"){
+					str += "ã‚«ã‚¦ãƒ³ã‚¿" + index.toString() + "bit ";
+					//str += hz.toFixed(12) + "Hz ";
+					str += "åŠ ç®—å€¤=" + obj.add.toString() + " ";
+					str += "æœ€å¤§å€¤=" + obj.max.toString() + " ";
+					str += "èª¤å·®=" + (obj.gosa > 0 ? "+" : "") + obj.gosa.toFixed(20) + " ";
+				//	str += obj.ppm.toFixed(10) + "ppm";
+				}
+				if(mode=="mul"){
+					str += "å‡ºåŠ›å‘¨æ³¢æ•°=" + obj.hz.toString() + "Hz ";
+					str += "Mul=" + obj.add.toString() + " ";
+					str += "Div=" + obj.max.toString() + " ";
+					str += "èª¤å·®=" + (obj.gosa > 0 ? "+" : "") + obj.gosa.toFixed(10) + " ";
+				}
+				//document.getElementById("hdl_code").value += str + "\n";
+
+				let option = document.createElement("option");
+				option.value = index.toString();
+				option.text = str;
+				select.appendChild(option);
+			});
+
+			// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§æœ€å¾Œã®ã‚‚ã®ã‚’é¸æŠ
+			select.selectedIndex = select.size - 1;
+			change_result();
+		}
+		else{
+			document.getElementById("result_text").value = "å€™è£œãŒã‚ã‚Šã¾ã›ã‚“ã€‚ã‚«ã‚¦ãƒ³ã‚¿æœ€å¤§ãƒ“ãƒƒãƒˆå¹…ã‚’å¢—ã‚„ã—ã¦ãã ã•ã„ã€‚";
+		}
+	}
+
+	function change_result() {
+		if(mode=="mul") return;
+
+		let selectedOptionElement = document.getElementById("result_select");
+		console.log("Selected option: " + selectedOptionElement.value);
+
+		const hdl_elements = document.getElementsByName("hdl_type");
+		let hdl_type = "verilog"; // åˆæœŸå€¤
+		for(let i=0; i<hdl_elements.length; i++){
+			if(hdl_elements[i].checked){
+				hdl_type = hdl_elements[i].value;
+				break;
+			}
+		}
+		output_hdl(hdl_type, selectedOptionElement.value);
+	}
+
+	document.addEventListener("DOMContentLoaded", function() {
+		document.getElementById("result_select").addEventListener("change", change_result);
+	});
+
+	function output_hdl(hdl_type, counter_bit_width)
+	{
+		let code = document.getElementById("DDS_" + hdl_type).innerHTML;
+
+		const base_str = base.toString().split('.').join('');
+		const target_str = target.toString().split('.').join('');
+		code = code.replace(hdl_type, base_str+"to"+target_str);
+
+		let str = "";
+		str += "ã‚«ã‚¦ãƒ³ã‚¿ " + counter_bit_width.toString() + "bitã€";
+		str += "åŠ ç®—å€¤ " + result_select[counter_bit_width].add.toString() + "ã€";
+		str += "æœ€å¤§å€¤ " + result_select[counter_bit_width].max.toString() + "ã€";
+		str += "èª¤å·® " + (result_select[counter_bit_width].gosa > 0 ? "+" : "") + result_select[counter_bit_width].gosa.toFixed(10);
+		code = code.replace("_COMMENT_", str);
+
+		code = code.replace("_COUNT_WIDTH_", counter_bit_width.toString());
+		code = code.replace("_MAX_NUM_", result_select[counter_bit_width].max.toString());
+		code = code.replace("_ADD_NUM_", result_select[counter_bit_width].add.toString());
+
+		// &lt; ã‚’ < ã«ç½®æ›
+		code = code.split("&lt;").join('<');
+		// &gt; ã‚’ > ã«ç½®æ›
+		code = code.split("&gt;").join('>');
+
+		document.getElementById("hdl_code").value = code;
+	}
+
+</script>
+
+<pre hidden id="DDS_sflp">
+// _COMMENT_
+
+%d COUNT_WIDTH _COUNT_WIDTH_
+
+circuit DDS_sflp
+{
+	instrout enable;
+
+	sel add&lt;COUNT_WIDTH&gt;;
+	sel max&lt;COUNT_WIDTH&gt;;
+	reg_wr count&lt;COUNT_WIDTH&gt;;
+	sel sa&lt;COUNT_WIDTH&gt;;
+
+	add = _ADD_NUM_;
+	max = _MAX_NUM_;
+
+	sa = count - max;
+
+	if(sa&lt;COUNT_WIDTH-1&gt;){ // count &lt; max
+		count += add;
+	}
+	else{
+		count := sa + add;
+		enable();
+	}
+}
+</pre>
+	
+<pre hidden id="DDS_verilog">
+// _COMMENT_
+
+module DDS_verilog (
+	input wire rst;
+	input wire clk;
+	output wire enable;
+);
+	localparam COUNT_WIDTH = _COUNT_WIDTH_;
+
+	wire [COUNT_WIDTH-1:0] add;
+	wire [COUNT_WIDTH-1:0] max;
+	reg  [COUNT_WIDTH-1:0] count;
+	wire [COUNT_WIDTH-1:0] sa;
+
+	assign add = COUNT_WIDTH'd_ADD_NUM_;
+	assign max = COUNT_WIDTH'd_MAX_NUM_;
+
+	assign sa = count - max;
+
+	always @(posedge clk) begin
+		if(rst)
+			count &lt;= COUNT_WIDTH'd0;
+		else if(sa[COUNT_WIDTH-1]) // count &lt; max
+			count &lt;= count + add;
+		else
+			count &lt;= sa + add;
+	end
+
+	assign enable = ~sa[COUNT_WIDTH-1];
+
+endmodule
+</pre>
+	
+<pre hidden id="DDS_vhdl">
+-- _COMMENT_
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+
+entity DDS_vhdl is
+	port(
+		rst, clk : in std_logic;
+		enable : out std_logic
+	);
+end DDS_vhdl;
+
+architecture RTL of DDS_vhdl is
+
+constant COUNT_WIDTH : integer := _COUNT_WIDTH_;
+constant ADD_NUM : std_logic_vector(COUNT_WIDTH-1 downto 0)
+	:= std_logic_vector(to_unsigned(_ADD_NUM_, COUNT_WIDTH));
+constant MAX_NUM : std_logic_vector(COUNT_WIDTH-1 downto 0)
+	:= std_logic_vector(to_unsigned(_MAX_NUM_, COUNT_WIDTH));
+
+signal add   : std_logic_vector(COUNT_WIDTH-1 downto 0);
+signal max   : std_logic_vector(COUNT_WIDTH-1 downto 0);
+signal count : std_logic_vector(COUNT_WIDTH-1 downto 0);
+signal sa    : std_logic_vector(COUNT_WIDTH-1 downto 0);
+
+begin
+
+	add &lt;= ADD_NUM;
+	max &lt;= MAX_NUM;
+
+	sa &lt;= count - max;
+
+	process(clk) begin
+		if rising_edge(clk) then
+			if rst='1' then
+				count &lt;= (others => '0');
+			elsif sa(COUNT_WIDTH-1)='1' then -- count &lt; max
+				count &lt;= count + add;
+			else
+				count &lt;= sa + add;
+			end if;
+		end if;
+	end process;
+
+	enable &lt;= not sa(COUNT_WIDTH-1);
+
+end RTL;
+</pre>
+
+</body>
 </html>
