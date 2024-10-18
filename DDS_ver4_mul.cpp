@@ -59,7 +59,6 @@ int main(void)
 	//	2048000; // SNES APU ¶¬ü”g”2
 	//	10738635; // SNES CPU base
 	//	33868800; // PSX ¶¬ü”g”
-	//	6144000; // test https://twitter.com/twi_kingyo/status/1112040773992640513
 	//	0.2; // test
 	//	0.01; // test ŠÔ‚ª‚©‚©‚é
 	//	499006; // test ŠÔ‚ª‚©‚©‚é
