@@ -59,7 +59,6 @@ int main(void)
 	//	2048000; // SNES APU ¶¬ü”g”2
 	//	10738635; // SNES CPU base
 	//	33868800; // PSX ¶¬ü”g”
-	//	0.2; // test
 	//	0.01; // test ŠÔ‚ª‚©‚©‚é
 	//	499006; // test ŠÔ‚ª‚©‚©‚é
 		124875000; // TangNano9K HDMI
