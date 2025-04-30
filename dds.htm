@@ -12,13 +12,13 @@
 	<meta name="twitter:site" content="@pgate1">
 	<meta name="twitter:title" content="DDSを応用した任意サイクルの生成">
 	<meta name="twitter:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
-	<meta name="twitter:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
+	<meta name="twitter:image" content="https://pgate1.at-ninja.jp/memo/dds/nekojitter.png">
 	<meta name="twitter:description" content="
 		FPGAでの同期設計で使用する、任意サイクル生成回路のためのパラメータ計算機です。
 	">
 	<meta property="og:url" content="https://pgate1.at-ninja.jp/memo/dds/dds.htm">
 	<meta property="og:title" content="DDSを応用した任意サイクルの生成">
-	<meta property="og:image" content="https://pgate1.at-ninja.jp/memo/dds/wave.png">
+	<meta property="og:image" content="https://pgate1.at-ninja.jp/memo/dds/nekojitter.png">
 	<meta property="og:description" content="
 	FPGAでの同期設計で使用する、任意サイクル生成回路のためのパラメータ計算機です。
 	">
@@ -36,7 +36,7 @@
 	<table border=0 width=100%><tr><td>
 	<a href=../../><b>HOME</b></a>
 	</td><td align=right>
-	2024/10/05
+	2025/04/13
 	</td></tr></table>
 	
 	<hr>
@@ -114,7 +114,7 @@
 		<hr>
 		<h2>解説</h2>
 		<h3>分周モードについて</h3>
-DDSを応用したカウンタでベースクロックから任意サイクルのイネーブル信号を生成します。
+DDSを応用した積分型カウンタでベースクロックから任意サイクルのイネーブル信号を生成します。
 特徴はイネーブル信号が偏っていないことです。
 FPGAでの同期設計のときに任意サイクル生成回路として使用します。
 非同期回路じゃなくてよい場合はこういう手もあるかなと。
@@ -190,6 +190,12 @@ circuit DDS_5to3
 マイナスは遅いサイクルが生成されることを意味します。
 動作期間が決まっている場合、遅いサイクルだと間に合わなくなることがあるため、
 速いサイクルを使用する方が良いようです。
+<p>
+あと、多少のジッタが許される低速クロック生成も良い適用事例です。
+例えば25MHzから32kHzを生成したくても、FPGA内蔵PLLではそこまで低い周波数を出せない場合があります。
+しかし単なる781分周では32.010kHzとなり誤差が大きくなってしまいます。
+そこでこのカウンタを使用することで誤差0の32kHzを生成することができます。
+
 
 <h3>逓倍モードについて</h3>
 
@@ -212,6 +218,12 @@ PLLのIPを使用するとき、IPジェネレータでターゲット周波数�
 Mul=37 Div=8 が分かりました。
 まぁ、入出力周波数をそれぞれ最大公約数3375000で割れば出てくるんですけどね。
 あと大抵、IPジェネレータが生成したファイルに書かれてます。
+
+
+<h2>おまけ</h2>
+
+本ページのマスコット、ネコジッタです。可愛がれ。
+<blockquote class="twitter-tweet" data-lang="ja" data-dnt="true"><p lang="ja" dir="ltr">ネコジッタ <a href="https://t.co/59trTRTBbw">pic.twitter.com/59trTRTBbw</a></p>&mdash; かんな丸⁧！！⁨ (@pgate1) <a href="https://twitter.com/pgate1/status/1628404745013698565?ref_src=twsrc%5Etfw">2023年2月22日</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script> 
 
 
 <hr>
